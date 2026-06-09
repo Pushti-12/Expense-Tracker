@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker with Charts</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+        }
+
+        .input-container {
+            width: 50%;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+
+        .chart-container {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Allow wrapping of elements */
+        }
+
+        form input,
+        form select,
+        form button {
+            padding: 10px;
+            border: 1px solid #a5d6a7;
+            border-radius: 4px;
+            box-sizing: border-box; /* Ensures the element's total width includes padding */
+        }
+
+        form input,
+        form select {
+            flex-grow: 1; /* Let the inputs grow to take available space */
+        }
+
+        form button {
+            padding: 8px 12px; /* Reduced padding for smaller size */
+            border: 1px solid #4caf50;
+            border-radius: 4px;
+            background-color: #4caf50;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            width: auto;
+            max-width: 150px; /* Set max width to prevent cutting */
+            flex-shrink: 0; /* Prevent button from shrinking */
+        }
+
+        form button:hover {
+            background-color: #388e3c;
+        }
+
+        .expense-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .expense-table th,
+        .expense-table td {
+            padding: 10px;
+            border: 1px solid #c8e6c9;
+            text-align: left;
+        }
+
+        .expense-table th {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+        }
+
+        .total-amount {
+            text-align: right;
+            font-size: 18px;
+            color: #2e7d32;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 45%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Expense Input and Table -->
+    <div class="input-container">
+        <h1>Expense Tracker</h1>
+        <form id="expense-form">
+            <input type="text" id="expense-name" placeholder="Expense Name" required />
+            <input type="number" id="expense-amount" placeholder="Amount" required />
+            <select id="expense-category" required>
+                <option value="" disabled selected>Select Category</option>
+                <option value="Food">Food</option>
+                <option value="Transport">Transport</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Other">Other</option>
+            </select>
+            <input type="date" id="expense-date" required />
+            <button type="submit">Add Expense</button>
+        </form>
+
+        <div class="expense-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Expense Name</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="expense-list"></tbody>
+            </table>
+            <div class="total-amount">
+                <strong>Total:</strong> ₹<span id="total-amount">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie Chart and Graph -->
+    <div class="chart-container">
+        <canvas id="pieChart"></canvas>
+        <canvas id="lineGraph"></canvas>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const expenseForm = document.getElementById("expense-form");
+            const expenseList = document.getElementById("expense-list");
+            const totalAmount = document.getElementById("total-amount");
+
+            let expenses = [];
+
+            // Pie Chart Setup
+            const pieCtx = document.getElementById("pieChart").getContext("2d");
+            const pieData = { labels: [], amounts: [] };
+            const pieChart = new Chart(pieCtx, {
+                type: "pie",
+                data: {
+                    labels: pieData.labels,
+                    datasets: [{
+                        data: pieData.amounts,
+                        backgroundColor: ["#f94144", "#f3722c", "#f8961e", "#43aa8b"],
+                    }],
+                },
+                options: { responsive: true, plugins: { title: { display: true, text: "Expenses by Category" } } },
+            });
+
+            // Line Graph Setup
+            const graphCtx = document.getElementById("lineGraph").getContext("2d");
+            const graphData = { dates: [], amounts: [] };
+            const lineGraph = new Chart(graphCtx, {
+                type: "line",
+                data: {
+                    labels: graphData.dates,
+                    datasets: [{
+                        label: "Expenses Over Time",
+                        data: graphData.amounts,
+                        borderColor: "#43aa8b",
+                        fill: false,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: "Date" } },
+                        y: { title: { display: true, text: "Amount (₹)" } },
+                    },
+                },
+            });
+
+            // Form Submission
+            expenseForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const name = document.getElementById("expense-name").value;
+                const amount = parseFloat(document.getElementById("expense-amount").value);
+                const category = document.getElementById("expense-category").value;
+                const date = document.getElementById("expense-date").value;
+
+                const expense = { id: Date.now(), name, amount, category, date };
+                expenses.push(expense);
+                updateUI();
+                expenseForm.reset();
+            });
+
+            function updateUI() {
+                // Update Expense Table
+                displayExpenses();
+
+                // Update Total Amount
+                updateTotalAmount();
+
+                // Update Charts
+                updatePieChart();
+                updateLineGraph();
+            }
+
+            function displayExpenses() {
+                expenseList.innerHTML = "";
+                expenses.forEach(expense => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${expense.name}</td>
+                        <td>₹${expense.amount.toLocaleString()}</td>
+                        <td>${expense.category}</td>
+                        <td>${expense.date}</td>
+                        <td><button class="delete-btn" data-id="${expense.id}">Delete</button></td>`;
+                    expenseList.appendChild(row);
+                });
+
+                // Delete Button Functionality
+                document.querySelectorAll(".delete-btn").forEach(button => {
+                    button.addEventListener("click", (e) => {
+                        const id = parseInt(e.target.getAttribute("data-id"));
+                        expenses = expenses.filter(exp => exp.id !== id);
+                        updateUI();
+                    });
+                });
+            }
+
+            function updateTotalAmount() {
+                const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+                totalAmount.textContent = total.toLocaleString();
+            }
+
+            function updatePieChart() {
+                const categorySums = expenses.reduce((acc, exp) => {
+                    acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+                    return acc;
+                }, {});
+
+                pieData.labels = Object.keys(categorySums);
+                pieData.amounts = Object.values(categorySums);
+
+                pieChart.data.labels = pieData.labels;
+                pieChart.data.datasets[0].data = pieData.amounts;
+                pieChart.update();
+            }
+
+            function updateLineGraph() {
+                const sortedExpenses = [...expenses].sort((a, b) => new Date(a.date) - new Date(b.date));
+                graphData.dates = sortedExpenses.map(exp => exp.date);
+                graphData.amounts = sortedExpenses.map(exp => exp.amount);
+
+                lineGraph.data.labels = graphData.dates;
+                lineGraph.data.datasets[0].data = graphData.amounts;
+                lineGraph.update();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Pie Chart and Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+        }
+        .input-container {
+            width: 50%;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .chart-container {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #f8f9fa;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        canvas {
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Input Forms -->
+    <div class="input-container">
+        <h1>Dynamic Pie Chart and Graph Input</h1>
+
+        <!-- Pie Chart Input -->
+        <form id="pieChartForm">
+            <h2>Pie Chart</h2>
+            <label for="pieLabel">Label:</label>
+            <input type="text" id="pieLabel" required>
+            <label for="pieValue">Value:</label>
+            <input type="number" id="pieValue" required>
+            <button type="submit">Add Data to Pie Chart</button>
+        </form>
+
+        <!-- Line Graph Input -->
+        <form id="graphForm">
+            <h2>Line Graph</h2>
+            <label for="xValue">X Value:</label>
+            <input type="number" id="xValue" required>
+            <label for="yValue">Y Value:</label>
+            <input type="number" id="yValue" required>
+            <button type="submit">Add Data to Graph</button>
+        </form>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-container">
+        <canvas id="pieChart"></canvas>
+        <canvas id="lineGraph"></canvas>
+    </div>
+
+    <script>
+        // Data and Configuration for Pie Chart
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        let pieLabels = [];
+        let pieData = [];
+        const pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    label: 'Pie Chart',
+                    data: pieData,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(255, 159, 64, 0.6)'
+                    ],
+                    borderColor: 'rgba(255, 255, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Pie Chart' }
+                }
+            }
+        });
+
+        // Data and Configuration for Line Graph
+        const graphCtx = document.getElementById('lineGraph').getContext('2d');
+        let xData = [];
+        let yData = [];
+        const lineGraph = new Chart(graphCtx, {
+            type: 'line',
+            data: {
+                labels: xData,
+                datasets: [{
+                    label: 'Line Graph',
+                    data: yData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Line Graph' }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'X-axis'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Y-axis'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Update Pie Chart
+        document.getElementById('pieChartForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const label = document.getElementById('pieLabel').value;
+            const value = parseFloat(document.getElementById('pieValue').value);
+
+            pieLabels.push(label);
+            pieData.push(value);
+
+            pieChart.data.labels = pieLabels;
+            pieChart.data.datasets[0].data = pieData;
+            pieChart.update();
+
+            document.getElementById('pieChartForm').reset();
+        });
+
+        // Update Line Graph
+        document.getElementById('graphForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const xValue = parseFloat(document.getElementById('xValue').value);
+            const yValue = parseFloat(document.getElementById('yValue').value);
+
+            xData.push(xValue);
+            yData.push(yValue);
+
+            lineGraph.data.labels = xData;
+            lineGraph.data.datasets[0].data = yData;
+            lineGraph.update();
+
+            document.getElementById('graphForm').reset();
+        });
+    </script>
+</body>
+</html>

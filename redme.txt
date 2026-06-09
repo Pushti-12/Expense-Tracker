@@ -1,0 +1,15 @@
+Steps(To run):-
+1)open combined_operation.py in vscode and run it
+2)open chatbot folder > right click > open with terminal
+3)Then type "python -m http.server 8000"
+4)open browser and go to "127.0.0.1:8000"
+
+For database(My Sql):-
+1)press windows+r then type cmd then press enter
+2)Now write "MySQL -u root -p"
+3)Password will be "Your password"
+4)then type "USE money_mentor;"
+5)To access the use data use "SELECT * FROM users;"
+6)To access the expense data use "SELECT * FROM expenses;"
+
+NOTE:- Double quotes are just to indicate that its a command just copy paste things inside it
