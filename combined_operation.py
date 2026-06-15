@@ -11,10 +11,15 @@ CORS(app)
 
 # MySQL Database Configuration
 db_config = {
-    "host": "localhost",
-    "user": "root",  # Replace with your MySQL username
-    "password": "Akshay",  # Replace with your MySQL password
-    "database": "money_mentor"  # Replace with your database name
+import os
+
+db_config = {
+    "host": os.getenv("mysql.railway.internal"),
+    "user": os.getenv("root"),
+    "password": os.getenv("CoApIQHWDEUjQTFEMAhodpmeOuTpxNmn"),
+    "database": os.getenv("railway"),
+    "port": int(os.getenv("MYSQLPORT", 3306))
+}
 }
 
 # Function to create the database if it doesn't exist
