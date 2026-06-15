@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 # MySQL Database Configuration
-db_config = {
+
 import os
 
 db_config = {
@@ -20,7 +20,7 @@ db_config = {
     "database": os.getenv("railway"),
     "port": int(os.getenv("MYSQLPORT", 3306))
 }
-}
+
 
 # Function to create the database if it doesn't exist
 def create_database(cursor):
