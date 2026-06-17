@@ -1,9 +1,6 @@
 {
-  "build": {
-    "builder": "pip",
-    "buildCommand": "pip install -r requirements.txt"
-  },
-  "start": {
-    "command": "gunicorn combined_operation:app --bind 0.0.0.0:$PORT"
+  "$schema": "https://railway.com/railway.schema.json",
+  "deploy": {
+    "startCommand": "gunicorn combined_operation:app --bind 0.0.0.0:$PORT"
   }
 }
