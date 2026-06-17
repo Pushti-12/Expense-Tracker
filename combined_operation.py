@@ -2,13 +2,22 @@ import os
 import mysql.connector
 import random
 import string
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 app = Flask(__name__)
 
 # Enable CORS for the entire app
 CORS(app)
+
+# Serve HTML files — Railway pe static files ke liye zaroori hai
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('.', filename)
 
 # MySQL Database Configuration
 db_config = {
