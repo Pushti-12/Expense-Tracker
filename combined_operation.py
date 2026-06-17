@@ -2,6 +2,7 @@ import os
 import mysql.connector
 import random
 import string
+import urllib.parse
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
@@ -20,13 +21,52 @@ def serve_static(filename):
     return send_from_directory('.', filename)
 
 # MySQL Database Configuration
-db_config = {
-    "host": os.getenv("MYSQLHOST"),
-    "user": os.getenv("MYSQLUSER"),
-    "password": os.getenv("MYSQLPASSWORD"),
-    "database": os.getenv("MYSQLDATABASE"),
-    "port": int(os.getenv("MYSQLPORT", 3306))
-}
+# Railway may provide either individual MySQL env vars or a single connection URL.
+
+def parse_mysql_url(url):
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in ("mysql", "mysql+mysqlconnector", "mysql+pymysql"):
+        raise ValueError(f"Unsupported DB URL scheme: {parsed.scheme}")
+
+    return {
+        "host": parsed.hostname,
+        "user": urllib.parse.unquote(parsed.username) if parsed.username else None,
+        "password": urllib.parse.unquote(parsed.password) if parsed.password else None,
+        "database": parsed.path.lstrip('/') if parsed.path else None,
+        "port": parsed.port or 3306,
+    }
+
+
+def build_db_config():
+    host = os.getenv("MYSQLHOST") or os.getenv("MYSQL_HOST")
+    user = os.getenv("MYSQLUSER") or os.getenv("MYSQL_USER")
+    password = os.getenv("MYSQLPASSWORD") or os.getenv("MYSQL_PASSWORD")
+    database = os.getenv("MYSQLDATABASE") or os.getenv("MYSQL_DATABASE") or os.getenv("MYSQL_DB")
+    port = os.getenv("MYSQLPORT") or os.getenv("MYSQL_PORT")
+
+    if not (host and user and password and database):
+        mysql_url = os.getenv("MYSQL_URL") or os.getenv("DATABASE_URL") or os.getenv("CLEARDB_DATABASE_URL")
+        if mysql_url:
+            return parse_mysql_url(mysql_url)
+
+    return {
+        "host": host,
+        "user": user,
+        "password": password,
+        "database": database,
+        "port": int(port) if port else 3306,
+    }
+
+
+db_config = build_db_config()
+
+
+def get_db_connection():
+    missing = [k for k, v in db_config.items() if k != "port" and not v]
+    if missing:
+        raise RuntimeError(f"Missing database environment variables: {missing}")
+
+    return mysql.connector.connect(**db_config)
 
 
 # Function to create the users table if it doesn't exist
@@ -115,7 +155,7 @@ def login():
     connection = None
     cursor = None
     try:
-        connection = mysql.connector.connect(**db_config)
+        connection = get_db_connection()
         cursor = connection.cursor()
 
         username = request.json.get('username')
@@ -128,7 +168,7 @@ def login():
         user = cursor.fetchone()
 
         if user and user[2] == password:
-            return jsonify({"message": "Login successful!"}), 200
+            return jsonify({"message": "Login successful!", "userId": user[0]}), 200
         else:
             return jsonify({"error": "Invalid username or password!"}), 400
 
@@ -146,7 +186,7 @@ def add_expense():
     connection = None
     cursor = None
     try:
-        connection = mysql.connector.connect(**db_config)
+        connection = get_db_connection()
         cursor = connection.cursor()
 
         name = request.json.get('name')
@@ -178,7 +218,7 @@ def get_expenses():
     connection = None
     cursor = None
     try:
-        connection = mysql.connector.connect(**db_config)
+        connection = get_db_connection()
         cursor = connection.cursor()
 
         cursor.execute("SELECT * FROM expense")
@@ -203,7 +243,7 @@ def delete_expense(expense_id):
     connection = None
     cursor = None
     try:
-        connection = mysql.connector.connect(**db_config)
+        connection = get_db_connection()
         cursor = connection.cursor()
 
         cursor.execute("DELETE FROM expense WHERE id = %s", (expense_id,))
@@ -237,6 +277,28 @@ if __name__ == '__main__':
         if connection:
             connection.close()
 
+
+@app.before_first_request
+def initialize_tables():
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        create_users_table(cursor)
+        create_expenses_table(cursor)
+        connection.commit()
+        print("Database tables initialized.")
+    except mysql.connector.Error as err:
+        print(f"Error during database initialization: {err}")
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+if __name__ == '__main__':
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 8080))
