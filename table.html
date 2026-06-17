@@ -167,7 +167,7 @@
 
                 const expense = { name, amount, category, date };
 
-                await fetch("http://127.0.0.1:5000/add_expense", {
+                await fetch("/add_expense", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(expense),
@@ -178,13 +178,13 @@
             });
 
             async function fetchExpenses() {
-                const response = await fetch("http://127.0.0.1:5000/get_expenses");
+                const response = await fetch("/get_expenses");
                 const expenses = await response.json();
                 updateUI(expenses);
             }
 
             async function deleteExpense(id) {
-                await fetch(`http://127.0.0.1:5000/delete_expense/${id}`, { method: "DELETE" });
+                await fetch(`/delete_expense/${id}`, { method: "DELETE" });
                 fetchExpenses();
             }
 
