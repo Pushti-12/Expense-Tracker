@@ -11,7 +11,6 @@ app = Flask(__name__)
 CORS(app)
 
 # MySQL Database Configuration
-
 db_config = {
     "host": os.getenv("MYSQLHOST"),
     "user": os.getenv("MYSQLUSER"),
@@ -20,14 +19,6 @@ db_config = {
     "port": int(os.getenv("MYSQLPORT", 3306))
 }
 
-
-# Function to create the database if it doesn't exist
-def create_database(cursor):
-    try:
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_config['database']}")
-        print(f"Database {db_config['database']} created or already exists.")
-    except mysql.connector.Error as err:
-        print(f"Error creating database: {err}")
 
 # Function to create the users table if it doesn't exist
 def create_users_table(cursor):
@@ -67,38 +58,33 @@ def generate_user_id(cursor):
     while True:
         user_id = ''.join(random.choices(string.digits, k=8))
         cursor.execute("SELECT COUNT(*) FROM users WHERE user_id = %s", (user_id,))
-        if cursor.fetchone()[0] == 0:  # Ensure it's unique
+        if cursor.fetchone()[0] == 0:
             return user_id
 
 # Signup route
 @app.route('/signup', methods=['POST'])
 def signup():
+    connection = None
+    cursor = None
     try:
-        # Connect to MySQL
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Create the table if it doesn't exist
         create_users_table(cursor)
 
-        # Retrieve form data
         username = request.json.get('username')
         password = request.json.get('password')
         birthdate = request.json.get('birthdate')
 
-        # Validate inputs
         if not username or not password or not birthdate:
             return jsonify({"error": "All fields are required!"}), 400
 
-        # Check if username already exists
         cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
         if cursor.fetchone()[0] > 0:
             return jsonify({"error": "Username already exists!"}), 400
 
-        # Generate unique user ID
         user_id = generate_user_id(cursor)
 
-        # Insert user into database
         cursor.execute(
             "INSERT INTO users (user_id, username, password, birthdate) VALUES (%s, %s, %s, %s)",
             (user_id, username, password, birthdate)
@@ -117,26 +103,22 @@ def signup():
 # Login route
 @app.route('/login', methods=['POST'])
 def login():
+    connection = None
+    cursor = None
     try:
-        cursor:None
-        connection:None
-        # Connect to MySQL
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Retrieve form data
         username = request.json.get('username')
         password = request.json.get('password')
 
-        # Validate inputs
         if not username or not password:
             return jsonify({"error": "Username and password are required!"}), 400
 
-        # Check if username exists and password matches
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
         user = cursor.fetchone()
 
-        if user and user[2] == password:  # Compare passwords
+        if user and user[2] == password:
             return jsonify({"message": "Login successful!"}), 200
         else:
             return jsonify({"error": "Invalid username or password!"}), 400
@@ -152,22 +134,20 @@ def login():
 # Route to add an expense
 @app.route('/add_expense', methods=['POST'])
 def add_expense():
+    connection = None
+    cursor = None
     try:
-        # Connect to MySQL
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Retrieve form data
         name = request.json.get('name')
         amount = request.json.get('amount')
         category = request.json.get('category')
         date = request.json.get('date')
 
-        # Validate inputs
         if not name or not amount or not category or not date:
             return jsonify({"error": "All fields are required!"}), 400
 
-        # Insert the expense into the database
         cursor.execute(
             "INSERT INTO expense (name, amount, category, date) VALUES (%s, %s, %s, %s)",
             (name, amount, category, date)
@@ -186,12 +166,12 @@ def add_expense():
 # Route to fetch all expenses
 @app.route('/get_expenses', methods=['GET'])
 def get_expenses():
+    connection = None
+    cursor = None
     try:
-        # Connect to MySQL
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Retrieve all expenses from the database
         cursor.execute("SELECT * FROM expense")
         rows = cursor.fetchall()
 
@@ -211,12 +191,12 @@ def get_expenses():
 # Route to delete an expense
 @app.route('/delete_expense/<int:expense_id>', methods=['DELETE'])
 def delete_expense(expense_id):
+    connection = None
+    cursor = None
     try:
-        # Connect to MySQL
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Delete the expense from the database
         cursor.execute("DELETE FROM expense WHERE id = %s", (expense_id,))
         connection.commit()
 
@@ -229,34 +209,26 @@ def delete_expense(expense_id):
         if connection:
             connection.close()
 
+
 if __name__ == '__main__':
+    # On Railway, tables create ho jayengi automatically first request pe
+    # CREATE DATABASE ki zaroorat nahi — Railway MySQL already database provide karta hai
     try:
-        # Connect to MySQL and create database and tables if they don't exist
-        connection = mysql.connector.connect(host=db_config['host'], user=db_config['user'], password=db_config['password'])
+        connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
-
-        # Create the database if it doesn't exist
-        create_database(cursor)
-
-        # Select the database explicitly
-        cursor.execute(f"USE {db_config['database']}")
-
-        # Create the users and expenses tables if they don't exist
         create_users_table(cursor)
         create_expenses_table(cursor)
-
+        connection.commit()
+        print("Tables initialized successfully.")
     except mysql.connector.Error as err:
-        print(f"Error: {err}")
+        print(f"Error during startup: {err}")
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
 
-    # Run the Flask application
-    if __name__ == "__main__":
-        app.run(
+    app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 8080))
     )
-
