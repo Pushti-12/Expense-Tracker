@@ -278,7 +278,7 @@ if __name__ == '__main__':
             connection.close()
 
 
-@app.before_first_request
+@app.before_request
 def initialize_tables():
     connection = None
     cursor = None
