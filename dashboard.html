@@ -1,209 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard with Search Bar</title>
-  <!-- Font Awesome CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+  <title>Money Mentor – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-dark: #0a7c4e;
+      --green-mid:  #12a868;
+      --green-light:#e6f7f1;
+      --accent:     #f0faf6;
+      --text-main:  #0f1f17;
+      --text-muted: #5c7a6b;
+      --border:     #c8e6d8;
+      --white:      #ffffff;
+      --shadow:     0 4px 24px rgba(10,124,78,0.10);
+    }
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow-x: hidden;
-      background-image: url("bg_2.jpeg");
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
+      font-family: 'Inter', sans-serif;
+      background: var(--accent);
+      min-height: 100vh;
     }
-
-    .navbar {
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .logo {
-      height: 80px;
-      width: auto;
-    }
-
-    .button-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      margin-top: auto;
-      padding-bottom: 30px;
-    }
-
-    .button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 20px 40px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 8px;
-      width: 200px;
-      text-align: center;
-    }
-
-    .button:hover {
-      background-color: #45a049;
-    }
-
-    .chatbot-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 300px;
-      background-color: #ffffff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      display: none;
-      flex-direction: column;
-      z-index: 1000;
-    }
-
-    .chatbot-header {
-      background-color: #4CAF50;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1rem;
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
-      cursor: pointer;
-    }
-
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      background-color: #f9f9f9;
-    }
-
-    .messages p {
-      margin: 0.5rem 0;
-      padding: 10px;
-      border-radius: 5px;
-      max-width: 70%;
-    }
-
-    .user-message {
-      margin-left: auto;
-      background-color: #d1ffd1;
-      text-align: right;
-    }
-
-    .bot-message {
-      background-color: #e0f7fa;
-      text-align: left;
-    }
-
-    .chat-input {
-      padding: 1rem;
-      gap: 10px;
-      background-color: #ffffff;
-      border-top: 1px solid #ddd;
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
-      display: flex;
-    }
-
-    .chat-input input {
-      flex: 1;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    .chat-input button {
-      padding: 0.5rem 1rem;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+    #root { min-height: 100vh; }
   </style>
 </head>
-
 <body>
-  <div class="navbar">
-    <img src="logo.png" alt="Logo" class="logo">
-  </div>
+<div id="root"></div>
 
-  <h2>Welcome to Money Mentor!</h2>
-  <p>This is your personalized dashboard.</p>
+<script type="text/babel">
+const { useState } = React;
 
-  <div class="button-container">
-    <button class="button" onclick="window.location.href='table.html'">Track Expenses</button>
-    <button class="button" onclick="window.location.href='blogs.html'">Blogs</button>
-    <button class="button" onclick="toggleChatbot()">Chatbot</button>
-    <button class="button" onclick="window.location.href='faq.html'">FAQ</button>
-  </div>
+const NAV_LINKS = [
+  { label: "Track Expenses", href: "table.html" },
+  { label: "Blogs",          href: "blogs.html" },
+  { label: "FAQ",            href: "faq.html"   },
+];
 
-  <div class="chatbot-container" id="chatbot">
-    <div class="chatbot-header" id="chatbot-header">Chatbot</div>
-    <div class="messages" id="messages">
-      <p class="bot-message">Hello! How can I help you?</p>
+const CARDS = [
+  {
+    icon: "📊",
+    title: "Track Expenses",
+    desc: "Log and monitor your daily spending in one place.",
+    href: "table.html",
+    color: "#e6f7f1",
+    accent: "#0a7c4e",
+  },
+  {
+    icon: "📝",
+    title: "Blogs",
+    desc: "Read tips and tricks to manage your money better.",
+    href: "blogs.html",
+    color: "#eff6ff",
+    accent: "#1d4ed8",
+  },
+  {
+    icon: "🤖",
+    title: "Chatbot",
+    desc: "Ask your finance questions — get instant answers.",
+    href: null,
+    color: "#fef9ec",
+    accent: "#b45309",
+    action: "chatbot",
+  },
+  {
+    icon: "❓",
+    title: "FAQ",
+    desc: "Find answers to commonly asked questions.",
+    href: "faq.html",
+    color: "#fdf2f8",
+    accent: "#7e22ce",
+  },
+];
+
+const BOT_RESPONSES = {
+  hello: "Hi! How can I assist you today?",
+  hi: "Hello! How can I help you?",
+  what: "Money Mentor helps you track and manage your expenses efficiently.",
+  how: "You can add expenses, view reports, and get financial insights!",
+  bye: "Goodbye! Have a great day!",
+  default: "I'm not sure about that. Could you rephrase?",
+};
+
+function Navbar({ onChatbot }) {
+  return (
+    <nav style={{
+      background: "var(--green-dark)",
+      padding: "0 32px",
+      height: 64,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      boxShadow: "0 2px 12px rgba(10,124,78,0.15)",
+      position: "sticky",
+      top: 0,
+      zIndex: 100,
+    }}>
+      <img src="logo.png" alt="Money Mentor" style={{ height: 44 }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+        {NAV_LINKS.map(l => (
+          <a key={l.label} href={l.href} style={{
+            color: "rgba(255,255,255,0.8)",
+            textDecoration: "none",
+            fontSize: 14,
+            fontWeight: 500,
+            transition: "color 0.2s",
+          }}
+          onMouseOver={e => e.target.style.color="#fff"}
+          onMouseOut={e => e.target.style.color="rgba(255,255,255,0.8)"}
+          >{l.label}</a>
+        ))}
+        <button onClick={() => { sessionStorage.clear(); window.location.href="index.html"; }}
+          style={{
+            background: "rgba(255,255,255,0.15)",
+            color: "white",
+            border: "1px solid rgba(255,255,255,0.25)",
+            borderRadius: 8,
+            padding: "7px 16px",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}>
+          Logout
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function FeatureCard({ card, onChatbot }) {
+  const [hovered, setHovered] = useState(false);
+  const handleClick = () => {
+    if (card.action === "chatbot") onChatbot();
+    else if (card.href) window.location.href = card.href;
+  };
+  return (
+    <div onClick={handleClick}
+      onMouseOver={() => setHovered(true)}
+      onMouseOut={() => setHovered(false)}
+      style={{
+        background: "var(--white)",
+        borderRadius: 16,
+        padding: "32px 28px",
+        cursor: "pointer",
+        border: `2px solid ${hovered ? card.accent : "transparent"}`,
+        boxShadow: hovered
+          ? `0 8px 32px rgba(10,124,78,0.13)`
+          : "0 2px 12px rgba(0,0,0,0.06)",
+        transform: hovered ? "translateY(-4px)" : "translateY(0)",
+        transition: "all 0.22s ease",
+      }}>
+      <div style={{
+        width: 56, height: 56,
+        borderRadius: 14,
+        background: card.color,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 26,
+        marginBottom: 20,
+      }}>{card.icon}</div>
+      <h3 style={{
+        fontSize: 17,
+        fontWeight: 700,
+        color: "var(--text-main)",
+        marginBottom: 8,
+        letterSpacing: "-0.3px",
+      }}>{card.title}</h3>
+      <p style={{
+        fontSize: 13,
+        color: "var(--text-muted)",
+        lineHeight: 1.6,
+      }}>{card.desc}</p>
+      <div style={{
+        marginTop: 20,
+        fontSize: 13,
+        fontWeight: 600,
+        color: card.accent,
+        display: "flex",
+        alignItems: "center",
+        gap: 4,
+      }}>
+        {card.action === "chatbot" ? "Open Chat" : "Go →"}
+      </div>
     </div>
-    <div class="chat-input">
-      <input type="text" id="user-input" placeholder="Type your message here">
-      <button id="send-button">Send</button>
-    </div>
-  </div>
+  );
+}
 
-  <script>
-    function toggleChatbot() {
-      const chatbotContainer = document.getElementById("chatbot");
-      chatbotContainer.style.display =
-        chatbotContainer.style.display === "flex" ? "none" : "flex";
+function Chatbot({ onClose }) {
+  const [messages, setMessages] = useState([
+    { from: "bot", text: "Hello! How can I help you today? 👋" }
+  ]);
+  const [input, setInput] = useState("");
+
+  const send = async () => {
+    if (!input.trim()) return;
+    const userText = input;
+    setMessages(m => [...m, { from: "user", text: userText }, { from: "bot", text: "Typing..." }]);
+    setInput("");
+
+    try {
+        const res = await fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: userText })
+        });
+        const data = await res.json();
+        setMessages(m => [...m.slice(0, -1), { from: "bot", text: data.reply }]);
+    } catch {
+        setMessages(m => [...m.slice(0, -1), { from: "bot", text: "Something went wrong. Try again!" }]);
     }
+};
 
-    const responses = {
-      "hello": "Hi! How can I assist you today?",
-      "hi": "Hello! How can I help you?",
-      "what": "This app helps you track and manage your money efficiently.",
-      "how": "You can interact with me for assistance and get financial insights.",
-      "bye": "Goodbye! Have a great day!",
-      "default": "I'm not sure how to respond. Could you rephrase that?"
-    };
+  return (
+    <div style={{
+      position: "fixed", bottom: 24, right: 24,
+      width: 320, background: "white",
+      borderRadius: 16,
+      boxShadow: "0 8px 40px rgba(0,0,0,0.15)",
+      display: "flex", flexDirection: "column",
+      overflow: "hidden", zIndex: 999,
+      border: "1px solid var(--border)",
+    }}>
+      <div style={{
+        background: "var(--green-dark)",
+        padding: "14px 18px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 20 }}>🤖</span>
+          <span style={{ color: "white", fontWeight: 600, fontSize: 15 }}>Money Mentor Bot</span>
+        </div>
+        <button onClick={onClose} style={{
+          background: "rgba(255,255,255,0.2)",
+          border: "none", color: "white",
+          borderRadius: 6, width: 28, height: 28,
+          cursor: "pointer", fontSize: 14, fontWeight: 700,
+        }}>✕</button>
+      </div>
 
-    document.getElementById("send-button").addEventListener("click", () => {
-      const userInput = document.getElementById("user-input").value.toLowerCase();
-      const messagesContainer = document.getElementById("messages");
+      <div style={{
+        flex: 1, overflowY: "auto",
+        padding: "16px", background: "#f9fafb",
+        maxHeight: 280,
+        display: "flex", flexDirection: "column", gap: 8,
+      }}>
+        {messages.map((m, i) => (
+          <div key={i} style={{
+            display: "flex",
+            justifyContent: m.from === "user" ? "flex-end" : "flex-start",
+          }}>
+            <span style={{
+              background: m.from === "user" ? "var(--green-dark)" : "white",
+              color: m.from === "user" ? "white" : "var(--text-main)",
+              padding: "9px 13px",
+              borderRadius: m.from === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
+              fontSize: 13,
+              maxWidth: "80%",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
+              lineHeight: 1.5,
+            }}>{m.text}</span>
+          </div>
+        ))}
+      </div>
 
-      if (userInput.trim() !== "") {
-        const userMessage = document.createElement("p");
-        userMessage.className = "user-message";
-        userMessage.textContent = userInput;
-        messagesContainer.appendChild(userMessage);
+      <div style={{
+        padding: "12px 14px",
+        borderTop: "1px solid var(--border)",
+        display: "flex", gap: 8,
+      }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && send()}
+          placeholder="Type a message..."
+          style={{
+            flex: 1, padding: "9px 12px",
+            border: "1.5px solid var(--border)",
+            borderRadius: 8, fontSize: 13,
+            fontFamily: "inherit", outline: "none",
+          }}
+        />
+        <button onClick={send} style={{
+          background: "var(--green-dark)",
+          color: "white", border: "none",
+          borderRadius: 8, padding: "9px 14px",
+          cursor: "pointer", fontSize: 13,
+          fontWeight: 600, fontFamily: "inherit",
+        }}>Send</button>
+      </div>
+    </div>
+  );
+}
 
-        const botMessage = document.createElement("p");
-        botMessage.className = "bot-message";
-        botMessage.textContent = responses[userInput] || responses["default"];
-        messagesContainer.appendChild(botMessage);
+function App() {
+  const [chatOpen, setChatOpen] = useState(false);
 
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        document.getElementById("user-input").value = "";
-      }
-    });
-  </script>
+  return (
+    <div>
+      <Navbar />
+
+      {/* Hero */}
+      <div style={{
+        background: "linear-gradient(135deg, var(--green-dark) 0%, #0d9e62 100%)",
+        padding: "52px 40px 48px",
+        color: "white",
+      }}>
+        <p style={{ fontSize: 13, fontWeight: 500, opacity: 0.7, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>Your Dashboard</p>
+        <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 10 }}>
+          Welcome back! 👋
+        </h1>
+        <p style={{ fontSize: 15, opacity: 0.75, maxWidth: 480, lineHeight: 1.6 }}>
+          Manage your expenses, read financial tips, and get smart insights — all in one place.
+        </p>
+      </div>
+
+      {/* Cards */}
+      <div style={{
+        maxWidth: 960,
+        margin: "0 auto",
+        padding: "40px 24px",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: 20,
+      }}>
+        {CARDS.map(card => (
+          <FeatureCard key={card.title} card={card} onChatbot={() => setChatOpen(true)} />
+        ))}
+      </div>
+
+      {chatOpen && <Chatbot onClose={() => setChatOpen(false)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
 </body>
-
 </html>

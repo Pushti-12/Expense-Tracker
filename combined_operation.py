@@ -1,3 +1,4 @@
+import requests
 import os
 import mysql.connector
 import random
@@ -257,6 +258,28 @@ def delete_expense(expense_id):
             cursor.close()
         if connection:
             connection.close()
+#Route for chatbot using Gemini API
+@app.route('/chat', methods=['POST'])
+def chat():
+    try:
+        user_message = request.json.get('message')
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={os.getenv('GEMINI_API_KEY')}"
+        
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": f"You are a helpful personal finance assistant called Money Mentor. Answer only finance related questions briefly. User asked: {user_message}"
+                }]
+            }]
+        }
+        
+        response = requests.post(gemini_url, json=payload)
+        data = response.json()
+        bot_reply = data['candidates'][0]['content']['parts'][0]['text']
+        
+        return jsonify({"reply": bot_reply})
+    except Exception as e:
+        return jsonify({"reply": "Sorry, I couldn't process that. Please try again."}), 500
 
 
 if __name__ == '__main__':
