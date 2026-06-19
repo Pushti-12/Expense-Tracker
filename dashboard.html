@@ -4,340 +4,222 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Money Mentor – Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --green-dark: #0a7c4e;
-      --green-mid:  #12a868;
-      --green-light:#e6f7f1;
-      --accent:     #f0faf6;
-      --text-main:  #0f1f17;
-      --text-muted: #5c7a6b;
-      --border:     #c8e6d8;
-      --white:      #ffffff;
-      --shadow:     0 4px 24px rgba(10,124,78,0.10);
-    }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--accent);
-      min-height: 100vh;
-    }
-    #root { min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; }
+    .card-hover { transition: all 0.25s cubic-bezier(.4,0,.2,1); }
+    .card-hover:hover { transform: translateY(-6px); }
+    .fade-in { animation: fadeIn 0.5s ease forwards; opacity: 0; }
+    @keyframes fadeIn { to { opacity: 1; } }
+    .slide-up { animation: slideUp 0.4s ease forwards; opacity: 0; transform: translateY(20px); }
+    @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-track { background: #f1f5f9; }
+    .chat-messages::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+    .typing-dot { animation: blink 1.2s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+    .stat-card { background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); }
   </style>
 </head>
-<body>
-<div id="root"></div>
+<body class="bg-emerald-50 min-h-screen">
 
-<script type="text/babel">
-const { useState } = React;
-
-const NAV_LINKS = [
-  { label: "Track Expenses", href: "table.html" },
-  { label: "Blogs",          href: "blogs.html" },
-  { label: "FAQ",            href: "faq.html"   },
-];
-
-const CARDS = [
-  {
-    icon: "📊",
-    title: "Track Expenses",
-    desc: "Log and monitor your daily spending in one place.",
-    href: "table.html",
-    color: "#e6f7f1",
-    accent: "#0a7c4e",
-  },
-  {
-    icon: "📝",
-    title: "Blogs",
-    desc: "Read tips and tricks to manage your money better.",
-    href: "blogs.html",
-    color: "#eff6ff",
-    accent: "#1d4ed8",
-  },
-  {
-    icon: "🤖",
-    title: "Chatbot",
-    desc: "Ask your finance questions — get instant answers.",
-    href: null,
-    color: "#fef9ec",
-    accent: "#b45309",
-    action: "chatbot",
-  },
-  {
-    icon: "❓",
-    title: "FAQ",
-    desc: "Find answers to commonly asked questions.",
-    href: "faq.html",
-    color: "#fdf2f8",
-    accent: "#7e22ce",
-  },
-];
-
-const BOT_RESPONSES = {
-  hello: "Hi! How can I assist you today?",
-  hi: "Hello! How can I help you?",
-  what: "Money Mentor helps you track and manage your expenses efficiently.",
-  how: "You can add expenses, view reports, and get financial insights!",
-  bye: "Goodbye! Have a great day!",
-  default: "I'm not sure about that. Could you rephrase?",
-};
-
-function Navbar({ onChatbot }) {
-  return (
-    <nav style={{
-      background: "var(--green-dark)",
-      padding: "0 32px",
-      height: 64,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      boxShadow: "0 2px 12px rgba(10,124,78,0.15)",
-      position: "sticky",
-      top: 0,
-      zIndex: 100,
-    }}>
-      <img src="logo.png" alt="Money Mentor" style={{ height: 44 }} />
-      <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-        {NAV_LINKS.map(l => (
-          <a key={l.label} href={l.href} style={{
-            color: "rgba(255,255,255,0.8)",
-            textDecoration: "none",
-            fontSize: 14,
-            fontWeight: 500,
-            transition: "color 0.2s",
-          }}
-          onMouseOver={e => e.target.style.color="#fff"}
-          onMouseOut={e => e.target.style.color="rgba(255,255,255,0.8)"}
-          >{l.label}</a>
-        ))}
-        <button onClick={() => { sessionStorage.clear(); window.location.href="index.html"; }}
-          style={{
-            background: "rgba(255,255,255,0.15)",
-            color: "white",
-            border: "1px solid rgba(255,255,255,0.25)",
-            borderRadius: 8,
-            padding: "7px 16px",
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}>
+  <!-- Navbar -->
+  <nav class="bg-emerald-800 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <img src="logo.png" alt="Money Mentor" class="h-10">
+      <div class="flex items-center gap-6">
+        <a href="table.html" class="text-emerald-200 hover:text-white text-sm font-medium transition-colors">Track Expenses</a>
+        <a href="blogs.html" class="text-emerald-200 hover:text-white text-sm font-medium transition-colors">Blogs</a>
+        <a href="faq.html" class="text-emerald-200 hover:text-white text-sm font-medium transition-colors">FAQ</a>
+        <button onclick="logout()"
+          class="bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg px-4 py-1.5 text-sm font-semibold transition-all">
           Logout
         </button>
       </div>
-    </nav>
-  );
-}
-
-function FeatureCard({ card, onChatbot }) {
-  const [hovered, setHovered] = useState(false);
-  const handleClick = () => {
-    if (card.action === "chatbot") onChatbot();
-    else if (card.href) window.location.href = card.href;
-  };
-  return (
-    <div onClick={handleClick}
-      onMouseOver={() => setHovered(true)}
-      onMouseOut={() => setHovered(false)}
-      style={{
-        background: "var(--white)",
-        borderRadius: 16,
-        padding: "32px 28px",
-        cursor: "pointer",
-        border: `2px solid ${hovered ? card.accent : "transparent"}`,
-        boxShadow: hovered
-          ? `0 8px 32px rgba(10,124,78,0.13)`
-          : "0 2px 12px rgba(0,0,0,0.06)",
-        transform: hovered ? "translateY(-4px)" : "translateY(0)",
-        transition: "all 0.22s ease",
-      }}>
-      <div style={{
-        width: 56, height: 56,
-        borderRadius: 14,
-        background: card.color,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 26,
-        marginBottom: 20,
-      }}>{card.icon}</div>
-      <h3 style={{
-        fontSize: 17,
-        fontWeight: 700,
-        color: "var(--text-main)",
-        marginBottom: 8,
-        letterSpacing: "-0.3px",
-      }}>{card.title}</h3>
-      <p style={{
-        fontSize: 13,
-        color: "var(--text-muted)",
-        lineHeight: 1.6,
-      }}>{card.desc}</p>
-      <div style={{
-        marginTop: 20,
-        fontSize: 13,
-        fontWeight: 600,
-        color: card.accent,
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-      }}>
-        {card.action === "chatbot" ? "Open Chat" : "Go →"}
-      </div>
     </div>
-  );
-}
+  </nav>
 
-function Chatbot({ onClose }) {
-  const [messages, setMessages] = useState([
-    { from: "bot", text: "Hello! How can I help you today? 👋" }
-  ]);
-  const [input, setInput] = useState("");
-
-  const send = async () => {
-    if (!input.trim()) return;
-    const userText = input;
-    setMessages(m => [...m, { from: "user", text: userText }, { from: "bot", text: "Typing..." }]);
-    setInput("");
-
-    try {
-        const res = await fetch('/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userText })
-        });
-        const data = await res.json();
-        setMessages(m => [...m.slice(0, -1), { from: "bot", text: data.reply }]);
-    } catch {
-        setMessages(m => [...m.slice(0, -1), { from: "bot", text: "Something went wrong. Try again!" }]);
-    }
-};
-
-  return (
-    <div style={{
-      position: "fixed", bottom: 24, right: 24,
-      width: 320, background: "white",
-      borderRadius: 16,
-      boxShadow: "0 8px 40px rgba(0,0,0,0.15)",
-      display: "flex", flexDirection: "column",
-      overflow: "hidden", zIndex: 999,
-      border: "1px solid var(--border)",
-    }}>
-      <div style={{
-        background: "var(--green-dark)",
-        padding: "14px 18px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 20 }}>🤖</span>
-          <span style={{ color: "white", fontWeight: 600, fontSize: 15 }}>Money Mentor Bot</span>
-        </div>
-        <button onClick={onClose} style={{
-          background: "rgba(255,255,255,0.2)",
-          border: "none", color: "white",
-          borderRadius: 6, width: 28, height: 28,
-          cursor: "pointer", fontSize: 14, fontWeight: 700,
-        }}>✕</button>
-      </div>
-
-      <div style={{
-        flex: 1, overflowY: "auto",
-        padding: "16px", background: "#f9fafb",
-        maxHeight: 280,
-        display: "flex", flexDirection: "column", gap: 8,
-      }}>
-        {messages.map((m, i) => (
-          <div key={i} style={{
-            display: "flex",
-            justifyContent: m.from === "user" ? "flex-end" : "flex-start",
-          }}>
-            <span style={{
-              background: m.from === "user" ? "var(--green-dark)" : "white",
-              color: m.from === "user" ? "white" : "var(--text-main)",
-              padding: "9px 13px",
-              borderRadius: m.from === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
-              fontSize: 13,
-              maxWidth: "80%",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
-              lineHeight: 1.5,
-            }}>{m.text}</span>
-          </div>
-        ))}
-      </div>
-
-      <div style={{
-        padding: "12px 14px",
-        borderTop: "1px solid var(--border)",
-        display: "flex", gap: 8,
-      }}>
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && send()}
-          placeholder="Type a message..."
-          style={{
-            flex: 1, padding: "9px 12px",
-            border: "1.5px solid var(--border)",
-            borderRadius: 8, fontSize: 13,
-            fontFamily: "inherit", outline: "none",
-          }}
-        />
-        <button onClick={send} style={{
-          background: "var(--green-dark)",
-          color: "white", border: "none",
-          borderRadius: 8, padding: "9px 14px",
-          cursor: "pointer", fontSize: 13,
-          fontWeight: 600, fontFamily: "inherit",
-        }}>Send</button>
-      </div>
-    </div>
-  );
-}
-
-function App() {
-  const [chatOpen, setChatOpen] = useState(false);
-
-  return (
-    <div>
-      <Navbar />
-
-      {/* Hero */}
-      <div style={{
-        background: "linear-gradient(135deg, var(--green-dark) 0%, #0d9e62 100%)",
-        padding: "52px 40px 48px",
-        color: "white",
-      }}>
-        <p style={{ fontSize: 13, fontWeight: 500, opacity: 0.7, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>Your Dashboard</p>
-        <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 10 }}>
-          Welcome back! 👋
-        </h1>
-        <p style={{ fontSize: 15, opacity: 0.75, maxWidth: 480, lineHeight: 1.6 }}>
-          Manage your expenses, read financial tips, and get smart insights — all in one place.
+  <!-- Hero -->
+  <div class="bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-600 text-white">
+    <div class="max-w-6xl mx-auto px-6 py-14">
+      <div class="fade-in">
+        <p class="text-emerald-300 text-xs font-semibold uppercase tracking-widest mb-3">Your Dashboard</p>
+        <h1 class="text-4xl font-extrabold tracking-tight mb-3">Welcome back! 👋</h1>
+        <p class="text-emerald-100/80 text-base max-w-lg leading-relaxed">
+          Track spending, get AI-powered insights, and take control of your financial future.
         </p>
       </div>
 
-      {/* Cards */}
-      <div style={{
-        maxWidth: 960,
-        margin: "0 auto",
-        padding: "40px 24px",
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-        gap: 20,
-      }}>
-        {CARDS.map(card => (
-          <FeatureCard key={card.title} card={card} onChatbot={() => setChatOpen(true)} />
-        ))}
+      <!-- Stats Row -->
+      <div class="grid grid-cols-3 gap-4 mt-10 max-w-lg">
+        <div class="stat-card rounded-xl p-4 slide-up delay-1">
+          <p class="text-2xl font-bold">₹0</p>
+          <p class="text-emerald-300 text-xs mt-1">This Month</p>
+        </div>
+        <div class="stat-card rounded-xl p-4 slide-up delay-2">
+          <p class="text-2xl font-bold" id="expense-count">0</p>
+          <p class="text-emerald-300 text-xs mt-1">Expenses</p>
+        </div>
+        <div class="stat-card rounded-xl p-4 slide-up delay-3">
+          <p class="text-2xl font-bold">AI</p>
+          <p class="text-emerald-300 text-xs mt-1">Powered</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="max-w-6xl mx-auto px-6 py-12">
+    <h2 class="text-lg font-bold text-gray-700 mb-6">Quick Actions</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+      <!-- Track Expenses -->
+      <a href="table.html" class="card-hover bg-white rounded-2xl p-7 shadow-sm border-2 border-transparent hover:border-emerald-500 hover:shadow-emerald-100 hover:shadow-xl cursor-pointer block slide-up delay-1">
+        <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl mb-5">📊</div>
+        <h3 class="text-base font-bold text-gray-800 mb-2">Track Expenses</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">Log and monitor your daily spending in real-time.</p>
+        <p class="text-emerald-600 font-semibold text-sm mt-5">Go →</p>
+      </a>
+
+      <!-- Blogs -->
+      <a href="blogs.html" class="card-hover bg-white rounded-2xl p-7 shadow-sm border-2 border-transparent hover:border-blue-500 hover:shadow-blue-100 hover:shadow-xl cursor-pointer block slide-up delay-2">
+        <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-3xl mb-5">📝</div>
+        <h3 class="text-base font-bold text-gray-800 mb-2">Blogs</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">Read expert tips and tricks to grow your wealth.</p>
+        <p class="text-blue-600 font-semibold text-sm mt-5">Go →</p>
+      </a>
+
+      <!-- Chatbot -->
+      <div onclick="toggleChat()" class="card-hover bg-white rounded-2xl p-7 shadow-sm border-2 border-transparent hover:border-amber-500 hover:shadow-amber-100 hover:shadow-xl cursor-pointer slide-up delay-3">
+        <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-3xl mb-5">🤖</div>
+        <h3 class="text-base font-bold text-gray-800 mb-2">AI Chatbot</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">Ask finance questions, get smart AI-powered answers.</p>
+        <p class="text-amber-600 font-semibold text-sm mt-5">Open Chat →</p>
       </div>
 
-      {chatOpen && <Chatbot onClose={() => setChatOpen(false)} />}
+      <!-- FAQ -->
+      <a href="faq.html" class="card-hover bg-white rounded-2xl p-7 shadow-sm border-2 border-transparent hover:border-purple-500 hover:shadow-purple-100 hover:shadow-xl cursor-pointer block slide-up delay-4">
+        <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-3xl mb-5">❓</div>
+        <h3 class="text-base font-bold text-gray-800 mb-2">FAQ</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">Find answers to the most commonly asked questions.</p>
+        <p class="text-purple-600 font-semibold text-sm mt-5">Go →</p>
+      </a>
     </div>
-  );
-}
+  </div>
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-</script>
+  <!-- Chatbot FAB Button -->
+  <button onclick="toggleChat()" id="chat-fab"
+    class="fixed bottom-6 right-6 w-14 h-14 bg-emerald-700 hover:bg-emerald-600 text-white rounded-full shadow-xl flex items-center justify-center text-2xl transition-all hover:scale-110 z-40">
+    💬
+  </button>
+
+  <!-- Chatbot Panel -->
+  <div id="chatbot" class="fixed bottom-24 right-6 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden z-50 hidden"
+    style="max-height: 480px;">
+    <!-- Header -->
+    <div class="bg-emerald-800 px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-sm">🤖</div>
+        <div>
+          <p class="text-white font-semibold text-sm">Money Mentor Bot</p>
+          <p class="text-emerald-300 text-xs">Powered by Gemini AI</p>
+        </div>
+      </div>
+      <button onclick="toggleChat()" class="text-white/70 hover:text-white text-lg font-bold">✕</button>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col gap-3" id="messages"
+      style="min-height: 260px; max-height: 300px;">
+      <div class="flex justify-start">
+        <div class="bg-white text-gray-700 text-sm px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm max-w-xs leading-relaxed">
+          Hi! I'm your AI finance assistant. Ask me anything about money, budgeting, or investing! 💰
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="p-3 border-t border-gray-100 flex gap-2 bg-white">
+      <input id="chat-input" type="text" placeholder="Ask a finance question..."
+        class="flex-1 text-sm px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all"
+        onkeydown="if(event.key==='Enter') sendMsg()">
+      <button onclick="sendMsg()"
+        class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+        Send
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Load expense count
+    fetch('/get_expenses')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          document.getElementById('expense-count').textContent = data.length;
+          const total = data.reduce((sum, e) => sum + e.amount, 0);
+          document.querySelector('.stat-card p.text-2xl').textContent = '₹' + total.toLocaleString('en-IN');
+        }
+      }).catch(() => {});
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    }
+
+    function toggleChat() {
+      const chatbot = document.getElementById("chatbot");
+      chatbot.classList.toggle("hidden");
+    }
+
+    async function sendMsg() {
+      const input = document.getElementById("chat-input");
+      const messages = document.getElementById("messages");
+      const text = input.value.trim();
+      if (!text) return;
+
+      // User bubble
+      messages.innerHTML += `
+        <div class="flex justify-end">
+          <div class="bg-emerald-700 text-white text-sm px-4 py-2.5 rounded-2xl rounded-tr-sm max-w-xs leading-relaxed">${text}</div>
+        </div>`;
+      input.value = "";
+      messages.scrollTop = messages.scrollHeight;
+
+      // Typing indicator
+      const typingId = "typing-" + Date.now();
+      messages.innerHTML += `
+        <div class="flex justify-start" id="${typingId}">
+          <div class="bg-white text-gray-400 text-sm px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm flex gap-1 items-center">
+            <span class="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>
+            <span class="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>
+            <span class="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>
+          </div>
+        </div>`;
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await res.json();
+        document.getElementById(typingId).innerHTML = `
+          <div class="bg-white text-gray-700 text-sm px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm max-w-xs leading-relaxed">${data.reply}</div>`;
+      } catch {
+        document.getElementById(typingId).innerHTML = `
+          <div class="bg-white text-red-500 text-sm px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm max-w-xs">Something went wrong. Try again!</div>`;
+      }
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
 </body>
 </html>
