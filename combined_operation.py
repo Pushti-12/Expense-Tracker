@@ -92,6 +92,7 @@ def create_expenses_table(cursor):
         create_table_query = """
         CREATE TABLE IF NOT EXISTS expense (
             id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id VARCHAR(8) NOT NULL,
             name VARCHAR(255) NOT NULL,
             amount FLOAT NOT NULL,
             category VARCHAR(50) NOT NULL,
@@ -194,16 +195,16 @@ def add_expense():
         amount = request.json.get('amount')
         category = request.json.get('category')
         date = request.json.get('date')
+        user_id = request.json.get('user_id')
 
-        if not name or not amount or not category or not date:
+        if not name or not amount or not category or not date or not user_id:
             return jsonify({"error": "All fields are required!"}), 400
 
         cursor.execute(
-            "INSERT INTO expense (name, amount, category, date) VALUES (%s, %s, %s, %s)",
-            (name, amount, category, date)
+            "INSERT INTO expense (user_id, name, amount, category, date) VALUES (%s, %s, %s, %s, %s)",
+            (user_id, name, amount, category, date)
         )
         connection.commit()
-
         return jsonify({"message": "Expense added successfully!"}), 201
     except mysql.connector.Error as err:
         return jsonify({"error": f"Database error: {err}"}), 500
@@ -222,11 +223,15 @@ def get_expenses():
         connection = get_db_connection()
         cursor = connection.cursor()
 
-        cursor.execute("SELECT * FROM expense")
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({"error": "user_id required"}), 400
+
+        cursor.execute("SELECT * FROM expense WHERE user_id = %s", (user_id,))
         rows = cursor.fetchall()
 
         expenses = [
-            {"id": row[0], "name": row[1], "amount": row[2], "category": row[3], "date": row[4].strftime('%Y-%m-%d')}
+            {"id": row[0], "name": row[2], "amount": row[3], "category": row[4], "date": row[5].strftime('%Y-%m-%d')}
             for row in rows
         ]
         return jsonify(expenses)

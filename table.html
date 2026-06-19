@@ -1,268 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker with Charts</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Your existing styles remain unchanged */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: row;
-            height: 100vh;
-        }
-
-        .input-container {
-            width: 50%;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            background-color: #f9f9f9;
-        }
-
-        .chart-container {
-            width: 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #f8f9fa;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        form input,
-        form select,
-        form button {
-            padding: 10px;
-            border: 1px solid #a5d6a7;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        form input,
-        form select {
-            flex-grow: 1;
-        }
-
-        form button {
-            padding: 8px 12px;
-            border: 1px solid #4caf50;
-            border-radius: 4px;
-            background-color: #4caf50;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            width: auto;
-            max-width: 150px;
-            flex-shrink: 0;
-        }
-
-        form button:hover {
-            background-color: #388e3c;
-        }
-
-        .expense-table table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        .expense-table th,
-        .expense-table td {
-            padding: 10px;
-            border: 1px solid #c8e6c9;
-            text-align: left;
-        }
-
-        .expense-table th {
-            background-color: #a5d6a7;
-            color: #1b5e20;
-        }
-
-        .total-amount {
-            text-align: right;
-            font-size: 18px;
-            color: #2e7d32;
-        }
-
-        canvas {
-            max-width: 100%;
-            max-height: 45%;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money Mentor – Track Expenses</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .fade-in { animation: fadeIn 0.4s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
+<body class="bg-emerald-50 min-h-screen">
 
-<body>
-    <!-- Expense Input and Table -->
-    <div class="input-container">
-        <h1>Expense Tracker</h1>
-        <form id="expense-form">
-            <input type="text" id="expense-name" placeholder="Expense Name" required />
-            <input type="number" id="expense-amount" placeholder="Amount" required />
-            <select id="expense-category" required>
-                <option value="" disabled selected>Select Category</option>
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Other">Other</option>
+  <!-- Navbar -->
+  <nav class="bg-emerald-800 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a href="dashboard.html"><img src="logo.png" alt="Money Mentor" class="h-10"></a>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="dashboard.html" class="text-emerald-200 hover:text-white text-sm font-medium transition-colors">← Dashboard</a>
+        <button onclick="logout()" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg px-4 py-1.5 text-sm font-semibold transition-all">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Track Expenses</h1>
+      <p class="text-gray-500 text-sm mt-1">Add, view and manage your daily spending</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left: Form + Table -->
+      <div class="lg:col-span-2 flex flex-col gap-6">
+
+        <!-- Add Expense Form -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h2 class="text-base font-bold text-gray-700 mb-4">Add New Expense</h2>
+          <form id="expense-form" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input type="text" id="expense-name" placeholder="Expense Name"
+              class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all" required>
+            <input type="number" id="expense-amount" placeholder="Amount (₹)"
+              class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all" required>
+            <select id="expense-category"
+              class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all" required>
+              <option value="" disabled selected>Select Category</option>
+              <option value="Food">🍔 Food</option>
+              <option value="Transport">🚗 Transport</option>
+              <option value="Entertainment">🎬 Entertainment</option>
+              <option value="Other">📦 Other</option>
             </select>
-            <input type="date" id="expense-date" required />
-            <button type="submit">Add Expense</button>
-        </form>
-
-        <div class="expense-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Expense Name</th>
-                        <th>Amount</th>
-                        <th>Category</th>
-                        <th>Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="expense-list"></tbody>
-            </table>
-            <div class="total-amount">
-                <strong>Total:</strong> ₹<span id="total-amount">0</span>
-            </div>
+            <input type="date" id="expense-date"
+              class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all" required>
+            <button type="submit"
+              class="sm:col-span-2 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-all">
+              + Add Expense
+            </button>
+          </form>
         </div>
+
+        <!-- Expense Table -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-bold text-gray-700">Your Expenses</h2>
+            <span class="text-sm text-gray-500">Total: <span class="font-bold text-emerald-700">₹<span id="total-amount">0</span></span></span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-emerald-50 text-emerald-800 text-xs uppercase tracking-wide">
+                  <th class="px-4 py-3 text-left rounded-l-lg">Name</th>
+                  <th class="px-4 py-3 text-left">Amount</th>
+                  <th class="px-4 py-3 text-left">Category</th>
+                  <th class="px-4 py-3 text-left">Date</th>
+                  <th class="px-4 py-3 text-left rounded-r-lg">Action</th>
+                </tr>
+              </thead>
+              <tbody id="expense-list" class="divide-y divide-gray-50"></tbody>
+            </table>
+            <div id="empty-state" class="text-center py-10 text-gray-400 text-sm hidden">
+              No expenses yet. Add your first one! 💸
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Charts -->
+      <div class="flex flex-col gap-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h2 class="text-base font-bold text-gray-700 mb-4">By Category</h2>
+          <canvas id="pieChart"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h2 class="text-base font-bold text-gray-700 mb-4">Over Time</h2>
+          <canvas id="lineGraph"></canvas>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Pie Chart and Graph -->
-    <div class="chart-container">
-        <canvas id="pieChart"></canvas>
-        <canvas id="lineGraph"></canvas>
-    </div>
+  <script>
+    let pieChartInstance = null;
+    let lineChartInstance = null;
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const expenseForm = document.getElementById("expense-form");
-            const expenseList = document.getElementById("expense-list");
-            const totalAmount = document.getElementById("total-amount");
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    }
 
-            // Fetch expenses on page load
-            fetchExpenses();
+    const userId = sessionStorage.getItem('userId');
 
-            // Add Expense functionality
-            expenseForm.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const name = document.getElementById("expense-name").value;
-                const amount = parseFloat(document.getElementById("expense-amount").value);
-                const category = document.getElementById("expense-category").value;
-                const date = document.getElementById("expense-date").value;
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchExpenses();
 
-                const expense = { name, amount, category, date };
+      document.getElementById("expense-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name     = document.getElementById("expense-name").value;
+        const amount   = parseFloat(document.getElementById("expense-amount").value);
+        const category = document.getElementById("expense-category").value;
+        const date     = document.getElementById("expense-date").value;
 
-                await fetch("/add_expense", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(expense),
-                });
-
-                fetchExpenses();
-                expenseForm.reset();
-            });
-
-            async function fetchExpenses() {
-                const response = await fetch("/get_expenses");
-                const expenses = await response.json();
-                updateUI(expenses);
-            }
-
-            async function deleteExpense(id) {
-                await fetch(`/delete_expense/${id}`, { method: "DELETE" });
-                fetchExpenses();
-            }
-
-            function updateUI(expenses) {
-                // Update Expense Table
-                expenseList.innerHTML = "";
-                let total = 0;
-
-                expenses.forEach(expense => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${expense.name}</td>
-                        <td>₹${expense.amount.toLocaleString()}</td>
-                        <td>${expense.category}</td>
-                        <td>${expense.date}</td>
-                        <td><button class="delete-btn" data-id="${expense.id}">Delete</button></td>`;
-                    expenseList.appendChild(row);
-                    total += expense.amount;
-                });
-
-                // Attach delete event listeners to the delete buttons
-                document.querySelectorAll(".delete-btn").forEach(button => {
-                    button.addEventListener("click", (e) => {
-                        const id = e.target.getAttribute("data-id");
-                        deleteExpense(id);
-                    });
-                });
-
-                // Update Total Amount
-                totalAmount.textContent = total.toLocaleString();
-
-                // Update Charts
-                updatePieChart(expenses);
-                updateLineGraph(expenses);
-            }
-
-            function updatePieChart(expenses) {
-                const categorySums = expenses.reduce((acc, exp) => {
-                    acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
-                    return acc;
-                }, {});
-
-                const pieChart = new Chart(document.getElementById("pieChart").getContext("2d"), {
-                    type: "pie",
-                    data: {
-                        labels: Object.keys(categorySums),
-                        datasets: [{
-                            data: Object.values(categorySums),
-                            backgroundColor: ["#f94144", "#f3722c", "#f8961e", "#43aa8b"],
-                        }],
-                    },
-                    options: { responsive: true },
-                });
-            }
-
-            function updateLineGraph(expenses) {
-                const sortedExpenses = [...expenses].sort((a, b) => new Date(a.date) - new Date(b.date));
-                const graphData = {
-                    dates: sortedExpenses.map(exp => exp.date),
-                    amounts: sortedExpenses.map(exp => exp.amount),
-                };
-
-                const lineGraph = new Chart(document.getElementById("lineGraph").getContext("2d"), {
-                    type: "line",
-                    data: {
-                        labels: graphData.dates,
-                        datasets: [{
-                            label: "Expenses Over Time",
-                            data: graphData.amounts,
-                            borderColor: "#43aa8b",
-                            fill: false,
-                        }],
-                    },
-                    options: { responsive: true },
-                });
-            }
+        await fetch("/add_expense", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, amount, category, date, user_id: userId }),
         });
-    </script>
-</body>
 
+        fetchExpenses();
+        document.getElementById("expense-form").reset();
+      });
+    });
+
+    async function fetchExpenses() {
+      const response = await fetch(`/get_expenses?user_id=${userId}`);
+      const expenses = await response.json();
+      updateUI(expenses);
+    }
+
+    async function deleteExpense(id) {
+      await fetch(`/delete_expense/${id}`, { method: "DELETE" });
+      fetchExpenses();
+    }
+
+    function updateUI(expenses) {
+      const expenseList = document.getElementById("expense-list");
+      const totalAmount = document.getElementById("total-amount");
+      const emptyState  = document.getElementById("empty-state");
+
+      expenseList.innerHTML = "";
+      let total = 0;
+
+      if (expenses.length === 0) {
+        emptyState.classList.remove("hidden");
+      } else {
+        emptyState.classList.add("hidden");
+        expenses.forEach(expense => {
+          const row = document.createElement("tr");
+          row.className = "hover:bg-emerald-50 transition-colors fade-in";
+          row.innerHTML = `
+            <td class="px-4 py-3 font-medium text-gray-700">${expense.name}</td>
+            <td class="px-4 py-3 text-emerald-700 font-semibold">₹${expense.amount.toLocaleString('en-IN')}</td>
+            <td class="px-4 py-3">
+              <span class="bg-emerald-100 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full">${expense.category}</span>
+            </td>
+            <td class="px-4 py-3 text-gray-500">${expense.date}</td>
+            <td class="px-4 py-3">
+              <button onclick="deleteExpense(${expense.id})"
+                class="text-red-400 hover:text-red-600 text-xs font-semibold hover:bg-red-50 px-2.5 py-1 rounded-lg transition-all">
+                Delete
+              </button>
+            </td>`;
+          expenseList.appendChild(row);
+          total += expense.amount;
+        });
+      }
+
+      totalAmount.textContent = total.toLocaleString('en-IN');
+      updatePieChart(expenses);
+      updateLineGraph(expenses);
+    }
+
+    function updatePieChart(expenses) {
+      const categorySums = expenses.reduce((acc, exp) => {
+        acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+        return acc;
+      }, {});
+
+      if (pieChartInstance) pieChartInstance.destroy();
+      pieChartInstance = new Chart(document.getElementById("pieChart"), {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(categorySums),
+          datasets: [{ data: Object.values(categorySums), backgroundColor: ["#10b981","#3b82f6","#f59e0b","#8b5cf6"], borderWidth: 0 }],
+        },
+        options: { responsive: true, plugins: { legend: { position: "bottom", labels: { font: { size: 11 } } } } },
+      });
+    }
+
+    function updateLineGraph(expenses) {
+      const sorted = [...expenses].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      if (lineChartInstance) lineChartInstance.destroy();
+      lineChartInstance = new Chart(document.getElementById("lineGraph"), {
+        type: "line",
+        data: {
+          labels: sorted.map(e => e.date),
+          datasets: [{
+            label: "Amount (₹)",
+            data: sorted.map(e => e.amount),
+            borderColor: "#10b981",
+            backgroundColor: "rgba(16,185,129,0.08)",
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: "#10b981",
+            pointRadius: 4,
+          }],
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+      });
+    }
+  </script>
+</body>
 </html>
