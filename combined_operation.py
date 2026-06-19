@@ -183,34 +183,64 @@ def login():
             connection.close()
 
 # Route to add an expense
+# Route to add an expense
 @app.route('/add_expense', methods=['POST'])
 def add_expense():
     connection = None
     cursor = None
+
     try:
+        # Connect to database
         connection = get_db_connection()
         cursor = connection.cursor()
 
-        name = request.json.get('name')
-        amount = request.json.get('amount')
-        category = request.json.get('category')
-        date = request.json.get('date')
-        user_id = request.json.get('user_id')
+        # Create expense table if it doesn't exist
+        create_expenses_table(cursor)
 
-        if not name or not amount or not category or not date or not user_id:
+        # Get data from frontend
+        data = request.get_json()
+
+        name = data.get('name')
+        amount = data.get('amount')
+        category = data.get('category')
+        date = data.get('date')
+        user_id = data.get('user_id')
+
+        # Validate inputs
+        if not all([name, amount, category, date, user_id]):
             return jsonify({"error": "All fields are required!"}), 400
 
-        cursor.execute(
-            "INSERT INTO expense (user_id, name, amount, category, date) VALUES (%s, %s, %s, %s, %s)",
-            (user_id, name, amount, category, date)
-        )
+        # Insert expense
+        query = """
+        INSERT INTO expense (user_id, name, amount, category, date)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+
+        values = (user_id, name, amount, category, date)
+
+        cursor.execute(query, values)
         connection.commit()
-        return jsonify({"message": "Expense added successfully!"}), 201
+
+        return jsonify({
+            "message": "Expense added successfully!"
+        }), 201
+
     except mysql.connector.Error as err:
-        return jsonify({"error": f"Database error: {err}"}), 500
+        print("DATABASE ERROR:", err)
+        return jsonify({
+            "error": str(err)
+        }), 500
+
+    except Exception as err:
+        print("GENERAL ERROR:", err)
+        return jsonify({
+            "error": str(err)
+        }), 500
+
     finally:
         if cursor:
             cursor.close()
+
         if connection:
             connection.close()
 
