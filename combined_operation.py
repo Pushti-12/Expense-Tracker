@@ -300,27 +300,6 @@ if __name__ == '__main__':
         if connection:
             connection.close()
 
-
-@app.before_request
-def initialize_tables():
-    connection = None
-    cursor = None
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        create_users_table(cursor)
-        create_expenses_table(cursor)
-        connection.commit()
-        print("Database tables initialized.")
-    except mysql.connector.Error as err:
-        print(f"Error during database initialization: {err}")
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-
-
 if __name__ == '__main__':
     app.run(
         host="0.0.0.0",
