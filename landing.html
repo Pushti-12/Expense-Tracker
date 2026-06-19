@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money Mentor – Smart Expense Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-text {
+      background: linear-gradient(135deg, #059669, #0d9488);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-bg {
+      background: radial-gradient(ellipse at top, #d1fae5 0%, #f0fdf4 50%, #ffffff 100%);
+    }
+    .card-hover { transition: all 0.25s cubic-bezier(.4,0,.2,1); }
+    .card-hover:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(5,150,105,0.12); }
+    .fade-up { animation: fadeUp 0.6s ease forwards; opacity: 0; }
+    .fade-up-2 { animation: fadeUp 0.6s ease 0.15s forwards; opacity: 0; }
+    .fade-up-3 { animation: fadeUp 0.6s ease 0.3s forwards; opacity: 0; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .step-line { position: relative; }
+    .step-line::after {
+      content: '';
+      position: absolute;
+      top: 24px; left: calc(50% + 32px);
+      width: calc(100% - 64px);
+      height: 2px;
+      background: linear-gradient(90deg, #10b981, #14b8a6);
+      display: none;
+    }
+    @media (min-width: 768px) { .step-line::after { display: block; } }
+    .step-line:last-child::after { display: none; }
+  </style>
+</head>
+<body class="bg-white text-gray-900 overflow-x-hidden">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <img src="logo.png" alt="Money Mentor" class="h-9">
+      <div class="flex items-center gap-3">
+        <a href="index.html"
+          class="text-gray-600 hover:text-gray-900 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-50 transition-all">
+          Login
+        </a>
+        <a href="sign_up.html"
+          class="bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-all shadow-sm">
+          Get Started Free
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── SECTION 1: HERO ── -->
+  <!-- Ye sabse pehla section hai — bada headline, tagline, CTA buttons -->
+  <section class="hero-bg min-h-screen flex items-center pt-16">
+    <div class="max-w-6xl mx-auto px-6 py-24 text-center">
+
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-4 py-1.5 rounded-full mb-8 fade-up">
+        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+        AI-Powered Finance Tracker
+      </div>
+
+      <!-- Headline — sabse important text -->
+      <h1 class="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6 fade-up-2">
+        Take control of<br>
+        <span class="gradient-text">your money.</span>
+      </h1>
+
+      <!-- Subheadline -->
+      <p class="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-10 fade-up-3">
+        Money Mentor helps you track every rupee, understand your spending habits,
+        and make smarter financial decisions — powered by AI.
+      </p>
+
+      <!-- CTA Buttons — do buttons: primary aur secondary -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center fade-up-3">
+        <a href="sign_up.html"
+          class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-xl text-base transition-all shadow-lg shadow-emerald-200 hover:shadow-emerald-300">
+          Start for Free →
+        </a>
+        <a href="index.html"
+          class="bg-white hover:bg-gray-50 text-gray-700 font-bold px-8 py-4 rounded-xl text-base transition-all border-2 border-gray-200 hover:border-gray-300">
+          Sign In
+        </a>
+      </div>
+
+      <!-- Social proof -->
+      <p class="text-gray-400 text-sm mt-8 fade-up-3">✨ Free forever • No credit card required</p>
+
+      <!-- Hero visual — simple dashboard mockup -->
+      <div class="mt-16 bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 max-w-3xl mx-auto fade-up-3">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-3 h-3 rounded-full bg-red-400"></div>
+          <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+          <div class="w-3 h-3 rounded-full bg-green-400"></div>
+          <div class="flex-1 bg-gray-100 rounded-full h-6 ml-2"></div>
+        </div>
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="bg-emerald-50 rounded-xl p-4 text-left">
+            <p class="text-xs text-gray-400 mb-1">Total Spent</p>
+            <p class="text-xl font-bold text-emerald-700">₹12,450</p>
+          </div>
+          <div class="bg-blue-50 rounded-xl p-4 text-left">
+            <p class="text-xs text-gray-400 mb-1">Expenses</p>
+            <p class="text-xl font-bold text-blue-700">24</p>
+          </div>
+          <div class="bg-purple-50 rounded-xl p-4 text-left">
+            <p class="text-xs text-gray-400 mb-1">Top Category</p>
+            <p class="text-xl font-bold text-purple-700">Food</p>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-3 flex items-center gap-3">
+          <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-sm">🤖</div>
+          <p class="text-sm text-gray-500">AI says: <span class="text-gray-700 font-medium">"You spent 30% more on food this week."</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SECTION 2: FEATURES ── -->
+  <!-- Features section — app ki key features cards mein dikhate hain -->
+  <section class="py-24 bg-white">
+    <div class="max-w-6xl mx-auto px-6">
+
+      <div class="text-center mb-16">
+        <p class="text-emerald-600 text-sm font-semibold uppercase tracking-widest mb-3">Features</p>
+        <h2 class="text-4xl font-black tracking-tight">Everything you need to<br>manage your finances</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Feature 1 -->
+        <div class="card-hover bg-gray-50 rounded-2xl p-7 border border-gray-100">
+          <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-2xl mb-5">📊</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Expense Tracking</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Log your daily expenses in seconds. Categorize and filter to see exactly where your money goes.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="card-hover bg-gray-50 rounded-2xl p-7 border border-gray-100">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl mb-5">📈</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Visual Analytics</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Beautiful charts that show your spending trends over time and breakdown by category at a glance.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="card-hover bg-gray-50 rounded-2xl p-7 border border-gray-100">
+          <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl mb-5">🤖</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">AI Finance Assistant</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Ask anything about personal finance. Powered by Google Gemini AI — get smart, instant answers 24/7.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="card-hover bg-gray-50 rounded-2xl p-7 border border-gray-100">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl mb-5">🔒</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Secure & Private</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Your financial data is yours alone. Each user gets their own private, secure account.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="card-hover bg-gray-50 rounded-2xl p-7 border border-gray-100">
+          <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center text-2xl mb-5">📝</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Finance Blogs</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Read curated articles on saving, investing, and budgeting to grow your financial knowledge.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="card-hover bg-gray-50 rounded-2xl p-7 border border-gray-100">
+          <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center text-2xl mb-5">⚡</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">100% Free</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">No hidden charges, no premium plans. Every feature is free to use, forever.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SECTION 3: HOW IT WORKS ── -->
+  <!-- 3 simple steps — signup se lekar insights tak ka journey -->
+  <section class="py-24 bg-emerald-50">
+    <div class="max-w-6xl mx-auto px-6">
+
+      <div class="text-center mb-16">
+        <p class="text-emerald-600 text-sm font-semibold uppercase tracking-widest mb-3">How it works</p>
+        <h2 class="text-4xl font-black tracking-tight">Up and running in<br>3 simple steps</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+
+        <!-- Step 1 -->
+        <div class="step-line text-center">
+          <div class="w-12 h-12 bg-emerald-700 text-white rounded-2xl flex items-center justify-center text-lg font-black mx-auto mb-5">1</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Create Account</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Sign up in seconds — just username, password, and date of birth. No email needed.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-line text-center">
+          <div class="w-12 h-12 bg-emerald-700 text-white rounded-2xl flex items-center justify-center text-lg font-black mx-auto mb-5">2</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Add Expenses</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Log your daily spending with name, amount, category, and date. Takes less than 10 seconds.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-line text-center">
+          <div class="w-12 h-12 bg-emerald-700 text-white rounded-2xl flex items-center justify-center text-lg font-black mx-auto mb-5">3</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Get Insights</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">View charts, track trends, and chat with our AI assistant to make smarter money decisions.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SECTION 4: CTA ── -->
+  <!-- Final call to action — last push to sign up -->
+  <section class="py-24 bg-emerald-800">
+    <div class="max-w-2xl mx-auto px-6 text-center">
+      <h2 class="text-4xl md:text-5xl font-black text-white tracking-tight mb-5">
+        Ready to take control<br>of your finances?
+      </h2>
+      <p class="text-emerald-200 text-lg mb-10">
+        Join Money Mentor today — it's free, fast, and powerful.
+      </p>
+      <a href="sign_up.html"
+        class="inline-block bg-white text-emerald-800 font-black px-10 py-4 rounded-xl text-lg transition-all hover:bg-emerald-50 shadow-xl">
+        Get Started for Free →
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <img src="logo.png" alt="Money Mentor" class="h-8 opacity-60">
+      <p class="text-sm">© 2026 Money Mentor. Built with Flask, MySQL & Gemini AI.</p>
+      <div class="flex gap-4 text-sm">
+        <a href="index.html" class="hover:text-white transition-colors">Login</a>
+        <a href="sign_up.html" class="hover:text-white transition-colors">Sign Up</a>
+        <a href="faq.html" class="hover:text-white transition-colors">FAQ</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

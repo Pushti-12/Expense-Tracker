@@ -15,7 +15,7 @@ CORS(app)
 # Serve HTML files — Railway pe static files ke liye zaroori hai
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory('.', 'landing.html')
 
 @app.route('/<path:filename>')
 def serve_static(filename):
